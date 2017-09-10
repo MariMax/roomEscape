@@ -30,7 +30,7 @@ void UDoorOpenner::BeginPlay()
 
 void UDoorOpenner::openTheDoor(){
     auto door = GetOwner();
-    FRotator rotator = FRotator(0.f, 330.f, 0.f);
+    FRotator rotator = FRotator(0.f, 360.f, 0.f);
     door->SetActorRotation(rotator, ETeleportType::None);
 }
 
