@@ -34,6 +34,14 @@ private:
     UInputComponent* inputComponent = nullptr;
     
     void grab();
+    void release();
+    void initPhysicsHandler();
+    void initInputHandler();
+    
+    //returns hit for first physics body in maximumReach
+    const FHitResult lineTrace() const;
+    
+    AActor* owner = nullptr;
 		
 	
 };

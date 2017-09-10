@@ -3,6 +3,8 @@
 #include "Grabber.h"
 #include <Public/DrawDebugHelpers.h>
 
+#define OUT
+
 
 // Sets default values for this component's properties
 UGrabber::UGrabber()
@@ -19,23 +21,28 @@ UGrabber::UGrabber()
 void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
+    owner  = GetOwner();
+    initPhysicsHandler();
+    initInputHandler();
+}
 
-	// ...
-    auto owner  = GetOwner();
-    physicsHandle =  owner->FindComponentByClass<UPhysicsHandleComponent>();
-    inputComponent =  owner->FindComponentByClass<UInputComponent>();
-    
+void UGrabber::initPhysicsHandler(){
     auto componentName = owner->GetName();
+    physicsHandle =  owner->FindComponentByClass<UPhysicsHandleComponent>();
     if (!physicsHandle)
         UE_LOG(LogTemp, Error, TEXT("handle is missing on %s"), *componentName);
+}
+
+void UGrabber::initInputHandler() {
+    inputComponent =  owner->FindComponentByClass<UInputComponent>();
+    auto componentName = owner->GetName();
     if (!inputComponent){
         UE_LOG(LogTemp, Error, TEXT("input is missing is missing on %s"), *componentName);
     } else {
         UE_LOG(LogTemp, Error, TEXT("input is FOUND"));
         inputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::grab);
+        inputComponent->BindAction("Grab", IE_Released, this, &UGrabber::release);
     }
-    
-    
 }
 
 
@@ -43,52 +50,45 @@ void UGrabber::BeginPlay()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	// ...
+    // if we hold something move it around
+}
+
+void UGrabber::grab() {
+    auto hitObject = lineTrace();
+    auto hitActor = hitObject.GetActor();
+    if (!hitActor) return;
+    UE_LOG(LogTemp, Error, TEXT("grab actor %s"), *hitActor->GetName());
+}
+
+void UGrabber::release() {
+    UE_LOG(LogTemp, Error, TEXT("release item"));
+}
+
+const FHitResult UGrabber::lineTrace() const {
     auto world = GetWorld();
     auto playerController = world->GetFirstPlayerController();
     
     FVector location;
     FRotator rotation;
     
-    playerController->GetPlayerViewPoint(location, rotation);
-    
-//    auto locationS = location.ToString();
-//    auto rotationS = rotation.ToString();
-//    FColor color = FColor(255, 0, 0, 255);
-    
-//    UE_LOG(LogTemp, Error, TEXT("location %s rotation %s"), *locationS, *rotationS);
-    
+    playerController->GetPlayerViewPoint(OUT location, OUT rotation);
     FVector endOfPlayerReach = location + rotation.Vector() * maximumReach;
     FCollisionObjectQueryParams collisionParams(ECollisionChannel::ECC_PhysicsBody);
     FCollisionQueryParams collisionQueryParams(
                                                FName(TEXT("")),
                                                false,
-                                               GetOwner()
-    );
-//    DrawDebugLine(
-//                  world,
-//                  location,
-//                  endOfPlayerReach,
-//                  color,
-//                  false,
-//                  1.f,
-//                  1,
-//                  5.f
-//                  );
+                                               owner
+                                               );
+    //    DrawDebugLine(world,location,endOfPlayerReach,color,false,1.f,1,5.f);
     FHitResult hitObject;
     world->LineTraceSingleByObjectType(
-                                          hitObject,
-                                          location,
-                                          endOfPlayerReach,
-                                          collisionParams,
-                                          collisionQueryParams
-                                          );
-//    auto hitActor = hitObject.GetActor();
-//    if (hitActor)
-//        UE_LOG(LogTemp, Error, TEXT("actor name %s"), *hitActor->GetName());
-	// ...
-}
-
-void UGrabber::grab() {
-    UE_LOG(LogTemp, Error, TEXT("grab item"));
+                                       OUT hitObject,
+                                       location,
+                                       endOfPlayerReach,
+                                       collisionParams,
+                                       collisionQueryParams
+                                       );
+    return hitObject;
 }
 
