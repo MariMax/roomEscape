@@ -39,7 +39,6 @@ void UGrabber::initInputHandler() {
     if (!inputComponent){
         UE_LOG(LogTemp, Error, TEXT("input is missing is missing on %s"), *componentName);
     } else {
-        UE_LOG(LogTemp, Error, TEXT("input is FOUND"));
         inputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::grab);
         inputComponent->BindAction("Grab", IE_Released, this, &UGrabber::release);
     }
@@ -50,15 +49,15 @@ void UGrabber::initInputHandler() {
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	// ...
-    // if we hold something move it around
-    if (!physicsHandle->GrabbedComponent) return;
+	
     
+    if (!physicsHandle->GrabbedComponent) return;
+    // if we hold something move it around
     FVector endOfTheReach;
     FVector location;
-    
+    // get new location
     getEndOfTheReach(location, OUT endOfTheReach);
-    
+    // set it
     physicsHandle->SetTargetLocation(endOfTheReach);
 }
 
@@ -66,21 +65,17 @@ void UGrabber::grab() {
     auto hitObject = lineTrace();
     auto hitActor = hitObject.GetActor();
     if (!hitActor) return;
-    
+    // grab component if we hit something usefull
     auto componentToGrab = hitObject.GetComponent();
     physicsHandle->GrabComponentAtLocation(
                                  componentToGrab,
                                  NAME_None,
                                  hitActor->GetActorLocation()
                                  );
-//    attachedObject = hitActor;
-//    UE_LOG(LogTemp, Error, TEXT("grab actor %s"), *hitActor->GetName());
 }
 
 void UGrabber::release() {
-//    UE_LOG(LogTemp, Error, TEXT("release item"));
     physicsHandle->ReleaseComponent();
-//    attachedObject = nullptr;
 }
 
 void UGrabber::getEndOfTheReach(FVector &start, FVector &end) const {

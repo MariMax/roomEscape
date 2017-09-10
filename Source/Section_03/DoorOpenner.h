@@ -7,6 +7,8 @@
 #include "Engine/TriggerVolume.h"
 #include "DoorOpenner.generated.h"
 
+#define OUT
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SECTION_03_API UDoorOpenner : public UActorComponent
@@ -28,7 +30,8 @@ public:
 private:
     void openTheDoor();
     void closeTheDoor();
-    AActor* whoCanOpenThisDoor;
+    
+    const float getTotalMassOnThePlate() const;
     
     UPROPERTY(VisibleAnywhere)
     float openAngle = 90.f;
@@ -44,5 +47,9 @@ private:
     float initialDoorPosition = 0;
     
     AActor* owner;
+    
+    UPROPERTY(EditAnywhere)
+    float triggerMass = 250.f;
+    
     
 };

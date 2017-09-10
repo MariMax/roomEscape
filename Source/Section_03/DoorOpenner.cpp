@@ -24,7 +24,7 @@ void UDoorOpenner::BeginPlay()
     auto world = GetWorld();
     auto playerController = world->GetFirstPlayerController();
     auto pawn = playerController->GetPawn();
-    whoCanOpenThisDoor = pawn;
+    
     owner = GetOwner();
     FRotator rotator = owner->GetActorRotation();
     initialDoorPosition = rotator.Yaw;
@@ -48,7 +48,7 @@ void UDoorOpenner::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
     UWorld* world = GetWorld();
-    if(pressurePlate->IsOverlappingActor(whoCanOpenThisDoor)){
+    if(getTotalMassOnThePlate() > triggerMass){
         openTheDoor();
         lastOpenTriggerTime =  GetWorld()->GetTimeSeconds();
         return;
@@ -61,5 +61,19 @@ void UDoorOpenner::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
     }
     
 	// ...
+}
+
+const float UDoorOpenner::getTotalMassOnThePlate() const {
+    TArray<AActor*> actors;
+    pressurePlate->GetOverlappingActors(OUT actors);
+    float total = 0.f;
+    for (const auto& item: actors){
+        const UPrimitiveComponent* component = item->FindComponentByClass<UPrimitiveComponent>();
+        total+=component->GetMass();
+        UE_LOG(LogTemp, Error, TEXT("item %s"), *item->GetName())
+    }
+    
+    
+    return total;
 }
 
