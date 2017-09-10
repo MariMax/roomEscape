@@ -37,11 +37,10 @@ private:
     void release();
     void initPhysicsHandler();
     void initInputHandler();
+    void getEndOfTheReach(FVector&, FVector&) const;
     
     //returns hit for first physics body in maximumReach
     const FHitResult lineTrace() const;
     
     AActor* owner = nullptr;
-		
-	
 };

@@ -52,28 +52,54 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	// ...
     // if we hold something move it around
+    if (!physicsHandle->GrabbedComponent) return;
+    
+    FVector endOfTheReach;
+    FVector location;
+    
+    getEndOfTheReach(location, OUT endOfTheReach);
+    
+    physicsHandle->SetTargetLocation(endOfTheReach);
 }
 
 void UGrabber::grab() {
     auto hitObject = lineTrace();
     auto hitActor = hitObject.GetActor();
     if (!hitActor) return;
-    UE_LOG(LogTemp, Error, TEXT("grab actor %s"), *hitActor->GetName());
+    
+    auto componentToGrab = hitObject.GetComponent();
+    physicsHandle->GrabComponentAtLocation(
+                                 componentToGrab,
+                                 NAME_None,
+                                 hitActor->GetActorLocation()
+                                 );
+//    attachedObject = hitActor;
+//    UE_LOG(LogTemp, Error, TEXT("grab actor %s"), *hitActor->GetName());
 }
 
 void UGrabber::release() {
-    UE_LOG(LogTemp, Error, TEXT("release item"));
+//    UE_LOG(LogTemp, Error, TEXT("release item"));
+    physicsHandle->ReleaseComponent();
+//    attachedObject = nullptr;
+}
+
+void UGrabber::getEndOfTheReach(FVector &start, FVector &end) const {
+    auto world = GetWorld();
+    auto playerController = world->GetFirstPlayerController();
+    
+    FRotator rotation;
+    
+    playerController->GetPlayerViewPoint(OUT start, OUT rotation);
+    end = start + rotation.Vector() * maximumReach;
 }
 
 const FHitResult UGrabber::lineTrace() const {
     auto world = GetWorld();
-    auto playerController = world->GetFirstPlayerController();
-    
     FVector location;
-    FRotator rotation;
+    FVector endOfPlayerReach;
     
-    playerController->GetPlayerViewPoint(OUT location, OUT rotation);
-    FVector endOfPlayerReach = location + rotation.Vector() * maximumReach;
+    getEndOfTheReach(location, endOfPlayerReach);
+    
     FCollisionObjectQueryParams collisionParams(ECollisionChannel::ECC_PhysicsBody);
     FCollisionQueryParams collisionQueryParams(
                                                FName(TEXT("")),
