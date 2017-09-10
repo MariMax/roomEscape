@@ -25,23 +25,41 @@ void UDoorOpenner::BeginPlay()
     auto playerController = world->GetFirstPlayerController();
     auto pawn = playerController->GetPawn();
     whoCanOpenThisDoor = pawn;
+    owner = GetOwner();
+    FRotator rotator = owner->GetActorRotation();
+    initialDoorPosition = rotator.Yaw;
 	
 }
 
 void UDoorOpenner::openTheDoor(){
-    auto door = GetOwner();
-    FRotator rotator = FRotator(0.f, 360.f, 0.f);
-    door->SetActorRotation(rotator, ETeleportType::None);
+    FRotator rotator = FRotator(0.f, initialDoorPosition + openAngle, 0.f);
+    owner->SetActorRotation(rotator, ETeleportType::None);
 }
+
+void UDoorOpenner::closeTheDoor(){
+    FRotator rotator = FRotator(0.f, initialDoorPosition, 0.f);
+    owner->SetActorRotation(rotator, ETeleportType::None);
+}
+
 
 
 // Called every frame
 void UDoorOpenner::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+    UWorld* world = GetWorld();
     if(pressurePlate->IsOverlappingActor(whoCanOpenThisDoor)){
         openTheDoor();
+        lastOpenTriggerTime =  GetWorld()->GetTimeSeconds();
+        return;
     }
+    
+
+    if (GetWorld()->GetTimeSeconds() - lastOpenTriggerTime > timeToCloseDoor ){
+        closeTheDoor();
+        return;
+    }
+    
 	// ...
 }
 

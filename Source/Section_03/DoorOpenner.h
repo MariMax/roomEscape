@@ -27,6 +27,8 @@ public:
 
 private:
     void openTheDoor();
+    void closeTheDoor();
+    AActor* whoCanOpenThisDoor;
     
     UPROPERTY(VisibleAnywhere)
     float openAngle = 90.f;
@@ -35,6 +37,12 @@ private:
     ATriggerVolume* pressurePlate;
     
     UPROPERTY(EditAnywhere)
-    AActor* whoCanOpenThisDoor;
+    float timeToCloseDoor = 1.f;
+    
+    float lastOpenTriggerTime;
+    
+    float initialDoorPosition = 0;
+    
+    AActor* owner;
     
 };
