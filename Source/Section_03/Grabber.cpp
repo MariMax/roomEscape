@@ -51,7 +51,7 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	
     
-    if (!physicsHandle->GrabbedComponent) return;
+    if (!physicsHandle || !physicsHandle->GrabbedComponent) return;
     // if we hold something move it around
     FVector endOfTheReach;
     FVector location;
@@ -67,6 +67,7 @@ void UGrabber::grab() {
     if (!hitActor) return;
     // grab component if we hit something usefull
     auto componentToGrab = hitObject.GetComponent();
+    if (!physicsHandle) return;
     physicsHandle->GrabComponentAtLocation(
                                  componentToGrab,
                                  NAME_None,
@@ -75,6 +76,7 @@ void UGrabber::grab() {
 }
 
 void UGrabber::release() {
+    if (!physicsHandle) return;
     physicsHandle->ReleaseComponent();
 }
 

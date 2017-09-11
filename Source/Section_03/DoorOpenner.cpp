@@ -24,10 +24,12 @@ void UDoorOpenner::BeginPlay()
     auto world = GetWorld();
     auto playerController = world->GetFirstPlayerController();
     auto pawn = playerController->GetPawn();
-    
     owner = GetOwner();
     FRotator rotator = owner->GetActorRotation();
     initialDoorPosition = rotator.Yaw;
+        if(!pressurePlate){
+            UE_LOG(LogTemp, Error, TEXT("Pressure Plate(trigger volume) is not assigned to %s"), *owner->GetName());
+        }
 	
 }
 
@@ -65,8 +67,11 @@ void UDoorOpenner::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 
 const float UDoorOpenner::getTotalMassOnThePlate() const {
     TArray<AActor*> actors;
-    pressurePlate->GetOverlappingActors(OUT actors);
     float total = 0.f;
+    
+    if (!pressurePlate) return total;
+    
+    pressurePlate->GetOverlappingActors(OUT actors);
     for (const auto& item: actors){
         const UPrimitiveComponent* component = item->FindComponentByClass<UPrimitiveComponent>();
         total+=component->GetMass();
