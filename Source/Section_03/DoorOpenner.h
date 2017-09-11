@@ -9,6 +9,7 @@
 
 #define OUT
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDoorEvent);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SECTION_03_API UDoorOpenner : public UActorComponent
@@ -26,30 +27,24 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+    
+    UPROPERTY(BlueprintAssignable)
+    FDoorEvent OnDoorOpenRequest;
+
+    UPROPERTY(BlueprintAssignable)
+    FDoorEvent OnDoorCloseRequest;
+
 
 private:
-    void openTheDoor();
-    void closeTheDoor();
-    
     const float getTotalMassOnThePlate() const;
     
-    UPROPERTY(VisibleAnywhere)
-    float openAngle = 90.f;
-	
     UPROPERTY(EditAnywhere)
     ATriggerVolume* pressurePlate = nullptr;
-    
-    UPROPERTY(EditAnywhere)
-    float timeToCloseDoor = 1.f;
-    
-    float lastOpenTriggerTime;
-    
-    float initialDoorPosition = 0;
     
     AActor* owner;
     
     UPROPERTY(EditAnywhere)
-    float triggerMass = 250.f;
+    float triggerMass = 50.f;
     
     
 };
